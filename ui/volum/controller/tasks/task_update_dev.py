@@ -183,7 +183,9 @@ class UpdateDev(TaskBase):
 
     def _create_volumlib(self, inner_archive, index):
         fb2_path = self.model.path_temp_fb2 + "fb2" + inner_archive.name[3:-4]
-        vl_path = self.model.path_temp_vl + "VL" + inner_archive.name[3:-4] + ".fb2.zip"
+        parts = inner_archive.name[3:-4].split("-")
+        new_filename = parts[0].rjust(7, "0") + "-" + parts[1].rjust(7, "0")
+        vl_path = self.model.path_temp_vl + "VL-" + new_filename + ".fb2.zip"
         fb2_zips = [name for name in os.listdir(fb2_path)]
         temp_fb2 = self.model.path_temp_vl + "temp.fb2"
         zip_file = zipfile.ZipFile(
@@ -202,10 +204,8 @@ class UpdateDev(TaskBase):
             if len(fb2) > 100 * 2 ** 10:
                 zip_file.write(temp_fb2, fz[:-4])
                 count += 1
-                parts = inner_archive.name[3:-4].split("-")
-                new_filename = parts[0].rjust(7, "0") + "-" + parts[1].rjust(7, "0")
                 self.controller.log.progress(
-                    "№" + str(index) + " Создание архива...      | "
+                    "№" + str(index).rjust(4, "0") + " Создание архива...      | "
                     + " VL-" + new_filename + ".fb2.zip" + "  | "
                     + fz[:-4]
 
@@ -247,7 +247,7 @@ class UpdateDev(TaskBase):
                 self.controller.log.warn(f"XML-документ '{xml_name}' пустой")
                 continue
             self.controller.log.progress(
-                "№" + str(index) + " Валидация/Обновление... | "
+                "№" + str(index).rjust(4, "0") + " Валидация/Обновление... | "
                 + inner_archive.name
                 + "   | "
                 + language
