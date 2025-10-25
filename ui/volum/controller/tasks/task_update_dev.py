@@ -119,9 +119,12 @@ class UpdateDev(TaskBase):
             executor.shutdown()
         return 0
 
+    @staticmethod
     def worker(self, inner_archive, ref_json, index):
-        self._read_zip(inner_archive, ref_json, index)
-        self._create_volumlib(inner_archive, index)
+        self.controller.log.info(f"№{index} Старт...")
+        self._read_zip(self, inner_archive, ref_json, index)
+        self._create_volumlib(self, inner_archive, index)
+        return 0
 
     def _create_zip(self, inner_archive) -> int:
         txt_folder = self.model.path_temp_txt + "txt-" + inner_archive + "/"
