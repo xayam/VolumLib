@@ -104,13 +104,19 @@ class UpdateDev(TaskBase):
         index = 0
         results = []
         futures = dict()
-        with concurrent.futures.ThreadPoolExecutor(max_workers=self.model.max_workers) \
+        with concurrent.futures.ThreadPoolExecutor(
+                max_workers=len(archives[skip:])  # self.model.max_workers  #
+        ) \
                 as executor:
             for inner_archive in archives[skip:]:
                 # self._analyze_size(self, inner_archive, ref_json)
                 # continue
-                vl_path = self.model.path_temp_vl + "VL" + inner_archive.name[3:-4] + ".fb2.zip"
+                parts = inner_archive.name[4:-4].split("-")
+                new_filename = parts[0].rjust(7, "0") + "-" + parts[1].rjust(7, "0")
+                vl_path = self.model.path_temp_vl + "VL-" + new_filename + ".fb2.zip"
+                # self.controller.log.info(vl_path)
                 if os.path.exists(vl_path):
+                    self.controller.log.info("Пропускаю архив... | " + vl_path)
                     continue
                 index += 1
                 # self.worker(self, inner_archive, ref_json, index)
@@ -183,11 +189,11 @@ class UpdateDev(TaskBase):
 
     def _create_volumlib(self, inner_archive, index):
         fb2_path = self.model.path_temp_fb2 + "fb2" + inner_archive.name[3:-4]
-        parts = inner_archive.name[3:-4].split("-")
+        parts = inner_archive.name[4:-4].split("-")
         new_filename = parts[0].rjust(7, "0") + "-" + parts[1].rjust(7, "0")
         vl_path = self.model.path_temp_vl + "VL-" + new_filename + ".fb2.zip"
         fb2_zips = [name for name in os.listdir(fb2_path)]
-        temp_fb2 = self.model.path_temp_vl + "temp.fb2"
+        temp_fb2 = self.model.path_temp_vl + f"temp{index}.fb2"
         zip_file = zipfile.ZipFile(
             file=vl_path,
             mode="w",
