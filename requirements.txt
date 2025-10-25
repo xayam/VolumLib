@@ -1,0 +1,16 @@
+chardet
+langid
+lxml
+pyinstaller
+pymorphy3
+stop-words
+colorama
+
+requests
+numpy
+pandas
+
+shellinford
+
+# установка через вкладку Python Packages IDE PyCharm
+Kivy

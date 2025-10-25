@@ -1,0 +1,21 @@
+import argostranslate.package
+import argostranslate.translate
+
+
+class Translate:
+
+    def __init__(self, from_code: str, to_code: str):
+        self.from_code = from_code
+        self.to_code = to_code
+
+        argostranslate.package.update_package_index()
+        available_packages = argostranslate.package.get_available_packages()
+        package_to_install = next(
+            filter(
+                lambda x: x.from_code == self.from_code and x.to_code == self.to_code, available_packages
+            )
+        )
+        argostranslate.package.install_from_path(package_to_install.download())
+
+    def translate(self, text: str) -> str:
+        return argostranslate.translate.translate(text, self.from_code, self.to_code)

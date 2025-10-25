@@ -1,0 +1,15 @@
+
+
+INVALID_QUERY_INPUT_ = "invalid_query_input_"
+ERROR_CONTROLLER_IS_NOT_SET_ = "error_controller_is_not_set_"
+ERROR_MODEL_IS_NOT_SET_ = "error_model_is_not_set_"
+SERVER_MODE_ENABLED_ = "server_mode_enabled_"
+CLIENT_MODE_ENABLED_ = "client_mode_enabled_"
+ERROR_NO_JOBS_ = "error_no_jobs_"
+RESULT_RUN_IS_NONE_ = "result_run_is_none_"
+COUNT_SKIP_ARCHIVES_ = "count_skip_archives_"
+LOADING_LIST_OF_TASK_ = "loading_list_of_task_"
+TASKS_FOR_EXECUTING_ = "tasks_for_executing_"
+TRANSLATE_COMPLETED_ = "translate_completed_"
+INVALID_TARGET_MODE_ = "invalid_target_mode_"
+TARGET_UNKNOWN_ = "target_unknown_"
