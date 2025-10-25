@@ -1,3 +1,4 @@
+import concurrent.futures
 import json
 import os
 import zipfile
@@ -102,46 +103,25 @@ class UpdateDev(TaskBase):
         self.analyze = dict()
         for genre in self.model.allow_genres:
             self.analyze[genre] = 0
-        for inner_archive in archives[skip:]:
-            # self._analyze_size(self, inner_archive, ref_json)
-            # continue
-            vl_path = self.model.path_temp_vl + "VL" + inner_archive.name[3:-4] + ".fb2.zip"
-            if os.path.exists(vl_path):
-                continue
-            self._read_zip(self, inner_archive, ref_json)
-            self._create_volumlib(self, inner_archive)
-            # split = [[]]
-            # limit = 0
-            # for i in range(len(docs)):
-            #     if len(docs[i]) > 20 * 2 ** 20:
-            #         continue
-            #     limit += len(docs[i])
-            #     split[-1].append(docs[i])
-            #     if limit > 20 * 2 ** 20:
-            #         split.append([])
-            #         limit = 0
-            # for i in range(len(split)):
-            #     if not split[i]:
-            #         continue
-            #     fm_filename = self.model.path_data + "/fm/txt" + \
-            #                   inner_archive.name[3:-4] + "_" + str(i) + ".fm"
-            #     if not os.path.exists(fm_filename):
-            #         self.controller.log.progress(
-            #             f"Создание FM-индекса... | {i + 1}/{len(split)} | " + fm_filename
-            #         )
-            #         thread = threading.Thread(target=self._create_fm,
-            #                                   args=(self, split[i], fm_filename))
-            #         thread.start()
-            #         thread.join()
-            # self._create_sqlite_db(self, str(inner_archive)[-17:-4], ref_json)
-            # self._create_zip(self, str(inner_archive)[-17:-4])
-        # print("")
-        # size = 0
-        # for genre in self.analyze:
-        #     size += self.analyze[genre]
-        #     print(genre + " | " + str(self.analyze[genre] / 2 ** 20).split(".")[0] + " MB")
-        # print(str(size / 2 ** 30).split(".")[0] + " GB")
+        index = 0
+        with concurrent.futures.ThreadPoolExecutor(max_workers=self.model.max_workers) \
+                as executor:
+            for inner_archive in archives[skip:]:
+                # self._analyze_size(self, inner_archive, ref_json)
+                # continue
+                vl_path = self.model.path_temp_vl + "VL" + inner_archive.name[3:-4] + ".fb2.zip"
+                if os.path.exists(vl_path):
+                    continue
+                index += 1
+                executor.submit(self.worker, self, inner_archive, ref_json, index)
+                if index > self.model.max_workers:
+                    index = 0
+            executor.shutdown()
         return 0
+
+    def worker(self, inner_archive, ref_json, index):
+        self._read_zip(inner_archive, ref_json, index)
+        self._create_volumlib(inner_archive, index)
 
     @staticmethod
     def _create_fm(docs, filename):
@@ -314,7 +294,7 @@ class UpdateDev(TaskBase):
                 except KeyError:
                     continue
 
-    def _create_volumlib(self, inner_archive):
+    def _create_volumlib(self, inner_archive, index):
         fb2_path = self.model.path_temp_fb2 + "fb2" + inner_archive.name[3:-4]
         vl_path = self.model.path_temp_vl + "VL" + inner_archive.name[3:-4] + ".fb2.zip"
         fb2_zips = [name for name in os.listdir(fb2_path)]
@@ -336,8 +316,8 @@ class UpdateDev(TaskBase):
                 zip_file.write(temp_fb2, fz[:-4])
                 count += 1
                 self.controller.log.progress(
-                    "Создание архива...     | "
-                    + " VL" + inner_archive.name[3:-4] + ".fb2.zip" + " | "
+                    "№" + index + " Создание архива...      | "
+                    + " VL" + inner_archive.name[3:-4] + ".fb2.zip" + "  | "
                     + fz[:-4]
 
                 )
@@ -347,7 +327,7 @@ class UpdateDev(TaskBase):
             os.remove(vl_path)
         print("")
 
-    def _read_zip(self, inner_archive, ref_json) -> list:
+    def _read_zip(self, inner_archive, ref_json, index) -> list:
         result = []
         language = "ru"
         archive = zipfile.ZipFile(inner_archive)
@@ -378,7 +358,7 @@ class UpdateDev(TaskBase):
                 self.controller.log.warn(f"XML-документ '{xml_name}' пустой")
                 continue
             self.controller.log.progress(
-                "Валидация/Обновление... | "
+                "№" + index + "  Валидация/Обновление... | "
                 + inner_archive.name
                 + " | "
                 + language
