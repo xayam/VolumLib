@@ -20,7 +20,7 @@
 
 # For developer: Installation and Build library
 
-- Install python 3.13.x (tested only this version)
+- Install python 3.13.9 (tested only this version)
 - Create virtual env, run command "python.exe -m venv venv"
 - Activate venv, run command "venv/Scripts/activate.bat"
 - Upgrade pip, run command "python.exe -m pip install -upgrade pip"
