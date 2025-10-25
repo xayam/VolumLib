@@ -105,7 +105,7 @@ class UpdateDev(TaskBase):
         results = []
         futures = dict()
         with concurrent.futures.ThreadPoolExecutor(
-                max_workers=len(archives[skip:])  # self.model.max_workers  #
+                max_workers=self.model.max_workers  # len(archives[skip:])
         ) \
                 as executor:
             for inner_archive in archives[skip:]:
@@ -122,7 +122,7 @@ class UpdateDev(TaskBase):
                 # self.worker(self, inner_archive, ref_json, index)
                 futures[inner_archive] = \
                     executor.submit(self.worker, self, inner_archive, ref_json, index)
-                if index >= self.model.max_workers:
+                if index >= self.model.max_workers:  # len(archives[skip:]):
                     index = 0
             executor.shutdown()
             for i in futures:
@@ -193,7 +193,7 @@ class UpdateDev(TaskBase):
         new_filename = parts[0].rjust(7, "0") + "-" + parts[1].rjust(7, "0")
         vl_path = self.model.path_temp_vl + "VL-" + new_filename + ".fb2.zip"
         fb2_zips = [name for name in os.listdir(fb2_path)]
-        temp_fb2 = self.model.path_temp_vl + f"temp{index}.fb2"
+        temp_fb2 = self.model.path_temp_vl + "temp-" + new_filename + ".fb2"
         zip_file = zipfile.ZipFile(
             file=vl_path,
             mode="w",
