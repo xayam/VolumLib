@@ -5,8 +5,6 @@ import zipfile
 from io import BytesIO
 from pathlib import Path
 from lxml.etree import XSLTApplyError
-import sqlite3
-import shellinford
 import threading
 
 from volum.controller.tasks.taskbase import TaskBase
@@ -104,6 +102,8 @@ class UpdateDev(TaskBase):
         for genre in self.model.allow_genres:
             self.analyze[genre] = 0
         index = 0
+        results = []
+        futures = dict()
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.model.max_workers) \
                 as executor:
             for inner_archive in archives[skip:]:
@@ -113,15 +113,19 @@ class UpdateDev(TaskBase):
                 if os.path.exists(vl_path):
                     continue
                 index += 1
-                executor.submit(self.worker, self, inner_archive, ref_json, index)
-                if index > self.model.max_workers:
+                # self.worker(self, inner_archive, ref_json, index)
+                futures[inner_archive] = \
+                    executor.submit(self.worker, self, inner_archive, ref_json, index)
+                if index >= self.model.max_workers:
                     index = 0
             executor.shutdown()
+            for i in futures:
+                results.append(futures[i].result())
         return 0
 
     @staticmethod
     def worker(self, inner_archive, ref_json, index):
-        self.controller.log.info(f"№{index} Старт...")
+        # self.controller.log.info(f"№{index} Старт...")
         self._read_zip(self, inner_archive, ref_json, index)
         self._create_volumlib(self, inner_archive, index)
         return 0
@@ -198,9 +202,11 @@ class UpdateDev(TaskBase):
             if len(fb2) > 100 * 2 ** 10:
                 zip_file.write(temp_fb2, fz[:-4])
                 count += 1
+                parts = inner_archive.name[3:-4].split("-")
+                new_filename = parts[0].rjust(7, "0") + "-" + parts[1].rjust(7, "0")
                 self.controller.log.progress(
-                    "№" + index + " Создание архива...      | "
-                    + " VL" + inner_archive.name[3:-4] + ".fb2.zip" + "  | "
+                    "№" + str(index) + " Создание архива...      | "
+                    + " VL-" + new_filename + ".fb2.zip" + "  | "
                     + fz[:-4]
 
                 )
@@ -241,9 +247,9 @@ class UpdateDev(TaskBase):
                 self.controller.log.warn(f"XML-документ '{xml_name}' пустой")
                 continue
             self.controller.log.progress(
-                "№" + index + "  Валидация/Обновление... | "
+                "№" + str(index) + " Валидация/Обновление... | "
                 + inner_archive.name
-                + " | "
+                + "   | "
                 + language
                 + " | .../"
                 + "/".join(xml_path[:-4].split("/")[-4:])
