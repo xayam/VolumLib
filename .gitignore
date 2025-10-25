@@ -11,7 +11,7 @@ dist/
 data/
 .~vsdx
 .spec
-.inp
+*.inp
 .db
 .db-journal
 .lmdb
