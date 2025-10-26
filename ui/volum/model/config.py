@@ -20,9 +20,7 @@ class Config:
     ICON_PNG = "volum/model/resources/logo.png"
     app_version = VERSION
     app_name = "VolumLib"
-    app_title = (
-        "Библиотека полнотекстового поиска по архивам текстовых файлов Либрусека"
-    )
+    app_title = "Библиотека VolumLib"
 
     path_data = "data"
     path_log = "log.txt"
