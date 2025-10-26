@@ -211,7 +211,7 @@ class UpdateDev(TaskBase):
                 zip_file.write(temp_fb2, fz[:-4])
                 count += 1
                 self.controller.log.progress(
-                    "№" + str(index).rjust(4, "0") + " Создание архива...      | "
+                    "№" + str(index).rjust(4, "0") + " Создание архива     ... | "
                     + " VL-" + new_filename + ".fb2.zip" + "  | "
                     + fz[:-4]
 
