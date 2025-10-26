@@ -15,7 +15,7 @@ class Config:
     path_temp_txt = path_temp + "/txt/"
     path_temp_fb2 = path_temp + "/fb2/"
     path_temp_vl = "E:/Torrents/MyTorrent/volumlib/VolumLib/volumlib/"
-    max_workers = 500
+    max_workers = 256
     ICON_ICO = "volum/model/resources/logo.ico"
     ICON_PNG = "volum/model/resources/logo.png"
     app_version = VERSION
